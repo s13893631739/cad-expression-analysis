@@ -300,7 +300,7 @@ save_base(file.path(out_root, "03_heatmap_volcano", "Batch.heatmap"), 13, 10, fu
   )
 })
 
-cat("Running GO and KEGG enrichment from DEG list\n")
+cat("Plotting saved GO and KEGG result tables\n")
 go_df <- load_go_results()
 write.table(go_df, file.path(out_root, "04_enrichment", "go_result.txt"), sep = "\t", quote = FALSE, row.names = FALSE)
 plot_go_three_ontologies(go_df, file.path(out_root, "04_enrichment", "GO_Three_Ontologies.png"))

@@ -14,7 +14,7 @@ R scripts and results from an independent study of gene expression in coronary a
 
 These are the samples included in this project. The discovery matrices contain 19,261 genes across 337 samples; external probe annotation uses GPL20115.
 
-The analysis uses expression normalization, ComBat batch correction, PCA, limma differential expression analysis, and LASSO/random forest/SVM-RFE candidate screening. Existing GO and KEGG result tables are used for enrichment interpretation and plotting. External evaluation includes probe mapping and ROC analysis.
+The analysis uses expression normalization, ComBat batch correction, PCA, limma differential expression analysis, and LASSO/random forest/SVM-RFE candidate screening. Existing GO and KEGG result tables are used for enrichment interpretation and plotting. External evaluation includes probe mapping and ROC analysis. The restored raw and intermediate inputs are versioned with Git LFS.
 
 ## Selected results
 
@@ -34,7 +34,7 @@ Rscript scripts/check_results.R
 
 This uses base R and the included files only. It checks the saved gene intersection and prints saved AUC values; it does not retrain models or recompute ROC curves.
 
-To rerun the analysis scripts, the original raw and intermediate inputs and additional R packages are required. Those data are not bundled. See [data availability](data/README.md) and [running the analysis](docs/RUNNING.md).
+To rerun the saved-input evaluation, install Git LFS and the listed R packages, then run `Rscript code/run_final.R`. The full experimental path is available as `Rscript code/run_full_experiment.R`; its outputs remain separate from the saved-input evaluation. See [data availability](data/README.md) and [running the analysis](docs/RUNNING.md).
 
 ## Files
 

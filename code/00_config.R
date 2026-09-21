@@ -8,9 +8,11 @@ get_script_path <- function() {
 }
 
 project_root <- normalizePath(file.path(dirname(get_script_path()), ".."), mustWork = TRUE)
-data_root <- file.path(project_root, "data")
+data_root <- Sys.getenv("CAD_DATA_ROOT", unset = file.path(project_root, "data"))
+data_root <- normalizePath(data_root, mustWork = TRUE)
 source_root <- data_root
-output_root <- file.path(project_root, "generated")
+output_root <- Sys.getenv("CAD_OUTPUT_ROOT", unset = file.path(project_root, "generated"))
+output_root <- normalizePath(output_root, mustWork = FALSE)
 
 dir.create(output_root, recursive = TRUE, showWarnings = FALSE)
 

@@ -4,7 +4,5 @@
 .Ruserdata
 .Rproj.user/
 generated/
-data/raw/
-data/intermediate/
 *.zip
 *.log

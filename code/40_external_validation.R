@@ -156,6 +156,16 @@ roc_colors <- c(
   "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"
 )
 
+train_expr <- read.table(paths$merged_after_combat, header = TRUE, sep = "\t", row.names = 1, check.names = FALSE)
+train_meta <- read.table(paths$metadata, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+train_group <- factor(train_meta$group, levels = c("Control", "Treat"))
+
+train_panel <- data.frame(
+  group = train_group,
+  t(train_expr[hub_genes, train_meta$sample, drop = FALSE]),
+  check.names = FALSE
+)
+
 roc_objects <- list()
 auc_table <- data.frame(
   Gene = character(),
@@ -166,11 +176,15 @@ auc_table <- data.frame(
 )
 
 for (gene in hub_genes) {
+  train_direction <- if (
+    mean(train_panel[train_panel$group == "Treat", gene], na.rm = TRUE) >=
+      mean(train_panel[train_panel$group == "Control", gene], na.rm = TRUE)
+  ) "<" else ">"
   roc_obj <- roc(
     response = group,
     predictor = gene_expr[, gene],
     levels = c("Control", "CAD"),
-    direction = "auto",
+    direction = train_direction,
     quiet = TRUE
   )
   roc_objects[[gene]] <- roc_obj
@@ -179,6 +193,7 @@ for (gene in hub_genes) {
     data.frame(
       Gene = gene,
       AUC = as.numeric(auc(roc_obj)),
+      Direction = train_direction,
       nProbes = probe_map$nProbes[probe_map$Gene == gene],
       Probes = probe_map$Probes[probe_map$Gene == gene],
       stringsAsFactors = FALSE
@@ -220,16 +235,6 @@ save_base_plot(
   res = 300
 )
 
-train_expr <- read.table(paths$merged_after_combat, header = TRUE, sep = "\t", row.names = 1, check.names = FALSE)
-train_meta <- read.table(paths$metadata, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-train_group <- factor(train_meta$group, levels = c("Control", "Treat"))
-
-train_panel <- data.frame(
-  group = train_group,
-  t(train_expr[hub_genes, train_meta$sample, drop = FALSE]),
-  check.names = FALSE
-)
-
 panel_fit <- glm(group ~ ., data = train_panel, family = binomial())
 panel_coefs <- coef(panel_fit)
 
@@ -239,11 +244,20 @@ panel_logit_score <- as.numeric(predict(
   panel_fit, newdata = as.data.frame(gene_expr[, hub_genes, drop = FALSE]),
   type = "link"
 ))
-panel_logit_roc <- roc(group, panel_logit_score, levels = c("Control", "CAD"), direction = "auto", quiet = TRUE)
+panel_train_score <- as.numeric(predict(panel_fit, newdata = train_panel, type = "link"))
+panel_train_direction <- if (
+  mean(panel_train_score[train_group == "Treat"], na.rm = TRUE) >=
+    mean(panel_train_score[train_group == "Control"], na.rm = TRUE)
+) "<" else ">"
+panel_logit_roc <- roc(group, panel_logit_score, levels = c("Control", "CAD"), direction = panel_train_direction, quiet = TRUE)
 panel_logit_auc <- as.numeric(auc(panel_logit_roc))
 
-train_direction <- sign(sapply(hub_genes, function(g) mean(train_panel[train_panel$group == "Treat", g]) - mean(train_panel[train_panel$group == "Control", g])))
-train_direction[train_direction == 0 | is.na(train_direction)] <- 1
+train_direction <- vapply(hub_genes, function(g) {
+  if (
+    mean(train_panel[train_panel$group == "Treat", g], na.rm = TRUE) >=
+      mean(train_panel[train_panel$group == "Control", g], na.rm = TRUE)
+  ) 1 else -1
+}, numeric(1))
 
 internal_auc <- read.table(
   file.path(output_root, "10_roc", "roc_auc_table.txt"),
@@ -255,10 +269,21 @@ internal_auc <- read.table(
 internal_weights <- setNames(internal_auc$AUC - 0.5, internal_auc$Gene)
 internal_weights <- internal_weights[hub_genes]
 
-ext_scaled_internal <- scale(gene_expr[, hub_genes, drop = FALSE])
-weighted_score <- as.numeric(ext_scaled_internal %*% (train_direction * internal_weights))
+train_x <- as.matrix(train_panel[, hub_genes, drop = FALSE])
+train_center <- colMeans(train_x, na.rm = TRUE)
+train_scale <- apply(train_x, 2, sd, na.rm = TRUE)
+train_scale[!is.finite(train_scale) | train_scale == 0] <- 1
+ext_scaled_train <- scale(gene_expr[, hub_genes, drop = FALSE], center = train_center, scale = train_scale)
+train_scaled <- scale(train_x, center = train_center, scale = train_scale)
+weighted_train_score <- as.numeric(train_scaled %*% (train_direction * internal_weights))
+weighted_score <- as.numeric(ext_scaled_train %*% (train_direction * internal_weights))
 weighted_score <- weighted_score / sum(abs(internal_weights))
-weighted_roc <- roc(group, weighted_score, levels = c("Control", "CAD"), direction = "auto", quiet = TRUE)
+weighted_train_score <- weighted_train_score / sum(abs(internal_weights))
+weighted_train_direction <- if (
+  mean(weighted_train_score[train_group == "Treat"], na.rm = TRUE) >=
+    mean(weighted_train_score[train_group == "Control"], na.rm = TRUE)
+) "<" else ">"
+weighted_roc <- roc(group, weighted_score, levels = c("Control", "CAD"), direction = weighted_train_direction, quiet = TRUE)
 weighted_auc <- as.numeric(auc(weighted_roc))
 
 plot_panel_roc <- function() {
@@ -299,11 +324,13 @@ save_base_plot(
 summary_tbl <- data.frame(
   item = c(
     "dataset", "samples_total", "samples_cad", "samples_control",
-    "single_gene_reference_fig", "weighted_signature_auc", "transfer_glm_auc"
+    "single_gene_reference_fig", "weighted_signature_auc", "transfer_glm_auc",
+    "weighted_score_scaling", "weighted_score_direction", "transfer_glm_direction"
   ),
   value = c(
     "GSE113079", ncol(expr), sum(group == "CAD"), sum(group == "Control"),
-    "GSE113079_external_ROC_10_hub_genes", sprintf("%.3f", weighted_auc), sprintf("%.3f", panel_logit_auc)
+    "GSE113079_external_ROC_10_hub_genes", sprintf("%.3f", weighted_auc), sprintf("%.3f", panel_logit_auc),
+    "training_cohort_center_scale", weighted_train_direction, panel_train_direction
   ),
   stringsAsFactors = FALSE
 )

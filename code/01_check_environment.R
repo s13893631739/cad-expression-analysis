@@ -15,6 +15,21 @@ if (length(missing_files) == 0) {
   stop("Required local inputs are missing. See data/README.md and data/input_manifest.tsv.")
 }
 
+is_lfs_pointer <- function(path) {
+  if (!file.exists(path)) return(FALSE)
+  first_line <- readLines(path, n = 1, warn = FALSE)
+  length(first_line) == 1 && identical(first_line, "version https://git-lfs.github.com/spec/v1")
+}
+
+lfs_pointers <- names(paths)[vapply(paths, is_lfs_pointer, logical(1))]
+if (length(lfs_pointers) > 0) {
+  stop(
+    "Git LFS objects are not downloaded for: ",
+    paste(lfs_pointers, collapse = ", "),
+    ". Run `git lfs pull` and retry."
+  )
+}
+
 for (name in c("gse20680_raw", "gse20681_raw", "diff_gene_exp", "rf_matrix", "roc_matrix")) {
   cat(describe_matrix(paths[[name]]), "\n")
 }

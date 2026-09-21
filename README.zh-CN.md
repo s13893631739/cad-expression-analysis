@@ -14,7 +14,7 @@
 
 以上为项目实际纳入样本。发现队列共 337 个样本、19,261 个基因，外部探针注释使用 GPL20115。
 
-分析包括表达标准化、ComBat 批次校正、PCA、limma 差异分析，以及 LASSO、随机森林和 SVM-RFE 候选基因筛选。GO、KEGG 部分读取已有结果表进行解读和绘图。外部评估包括探针映射和 ROC 分析。
+分析包括表达标准化、ComBat 批次校正、PCA、limma 差异分析，以及 LASSO、随机森林和 SVM-RFE 候选基因筛选。GO、KEGG 部分读取已有结果表进行解读和绘图。外部评估包括探针映射和 ROC 分析。恢复的原始与中间输入通过 Git LFS 版本管理。
 
 ## 部分结果
 
@@ -34,7 +34,7 @@ Rscript scripts/check_results.R
 
 这一步仅使用基础 R 和仓库已有文件，检查基因名单交集并输出已保存的 AUC，不会重新训练模型或计算 ROC。
 
-完整重跑还需要原项目的原始与中间输入文件，以及相关 R 包。数据未随仓库分发，详见 [数据说明](data/README.md) 和 [运行说明](docs/RUNNING.md)（英文）。
+安装 Git LFS 和相关 R 包后，可运行 `Rscript code/run_final.R` 评估已保存的中间输入。完整实验路径为 `Rscript code/run_full_experiment.R`，其输出与已保存输入的评估结果分开保存。详见 [数据说明](data/README.md) 和 [运行说明](docs/RUNNING.md)（英文）。
 
 ## 文件
 
