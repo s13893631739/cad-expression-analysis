@@ -26,7 +26,15 @@
 
 ## 开始使用
 
-安装 R 后，在仓库根目录运行：
+克隆仓库后，先下载 Git LFS 管理的 28 个输入文件并校验：
+
+```sh
+git lfs install
+git lfs pull
+Rscript scripts/check_inputs.R
+```
+
+安装 R 后，在仓库根目录运行以下命令检查已保存的基因名单和 AUC 表：
 
 ```sh
 Rscript scripts/check_results.R
@@ -40,11 +48,12 @@ Rscript scripts/check_results.R
 
 ```text
 code/       分析脚本
-scripts/    已附结果检查入口
+scripts/    输入与结果检查入口
 results/    数值结果和基因名单
 figures/    原分析的部分图表
 data/       输入要求与文件校验清单
 docs/       方法与运行说明
+generated/  本地重跑生成的输出（已被 Git 忽略）
 ```
 
 ## 作者

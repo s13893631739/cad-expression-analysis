@@ -26,6 +26,14 @@ The saved screening lists share 10 candidate genes. In GSE113079, MAPK8IP1 has a
 
 ## Getting started
 
+After cloning, download the 28 Git LFS inputs and verify their checksums:
+
+```sh
+git lfs install
+git lfs pull
+Rscript scripts/check_inputs.R
+```
+
 To inspect the included gene lists and AUC table, run this from the repository root with R installed:
 
 ```sh
@@ -40,11 +48,12 @@ To rerun the saved-input evaluation, install Git LFS and the listed R packages, 
 
 ```text
 code/       Analysis scripts
-scripts/    Check the included result tables
+scripts/    Check inputs and included result tables
 results/    Saved numerical results and gene lists
 figures/    Selected figures from the original analysis
 data/       Input requirements and file checksums
 docs/       Methods and running instructions
+generated/  Local outputs from rerunning the analysis (ignored by Git)
 ```
 
 ## Author

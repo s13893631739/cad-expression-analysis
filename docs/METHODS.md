@@ -20,9 +20,9 @@ The saved SVM table reports Accuracy 0.691021 at 31 variables. Screening before 
 
 GSE113079 includes 93 CAD and 48 control samples in this analysis. Probes are mapped using GPL20115 GeneSymbol annotations, with mean aggregation for genes having multiple probes. MAPK8IP1 has a saved AUC of 0.765681 and CLEC4D 0.683020.
 
-ROC direction is chosen automatically on the evaluated data, so AUC alone does not establish consistent biological direction across cohorts. The historical weighted 10-gene score has AUC 0.539 and uses cohort-level external standardization. It is not a frozen single-patient deployment procedure.
+The historical external AUC table predates the reproducibility corrections and does not record the direction used for each ROC curve. In the current saved-input run, ROC direction is determined from the discovery cohort and applied unchanged to GSE113079. The historical weighted 10-gene score has AUC 0.539 and uses cohort-level external standardization; the corrected rerun is written under `generated/` and reports 0.448. Neither score is a frozen single-patient deployment procedure.
 
-The original transferred logistic-regression score combined standardized external features with coefficients fitted on unstandardized discovery features. Repository preparation changed prediction to use the fitted model's feature scale consistently. This has not been rerun, and cross-platform comparability remains unresolved. The original transfer AUC and its figure are excluded from the published snapshots.
+The original transferred logistic-regression score combined standardized external features with coefficients fitted on unstandardized discovery features. Repository preparation changed prediction to use the fitted model's feature scale consistently; the corrected rerun is written under `generated/` and reports 0.478. Cross-platform comparability remains unresolved, so the original transfer AUC and its figure are excluded from the published snapshots.
 
 ## Scope
 

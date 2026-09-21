@@ -246,9 +246,9 @@ plot_pca_figure <- function(expr, title, output_prefix) {
 }
 
 plot_dense_boxplot(before_expr, "Before batch correction", file.path(out_root, "01_boxplot", "boxplot.preNorm"))
-plot_dense_boxplot(after_expr, "After batch correction", file.path(out_root, "01_boxplot", "boxplot.normalzie"))
+plot_dense_boxplot(after_expr, "After batch correction", file.path(out_root, "01_boxplot", "boxplot.normalize"))
 plot_pca_figure(before_expr, "Before batch correction", file.path(out_root, "02_pca", "PCA.preNorm"))
-plot_pca_figure(after_expr, "After batch correction", file.path(out_root, "02_pca", "PCA.normalzie"))
+plot_pca_figure(after_expr, "After batch correction", file.path(out_root, "02_pca", "PCA.normalize"))
 
 cat("Drawing DEG heatmap and volcano from differential-expression tables\n")
 diff_table <- read.table(paths$batch_diff, header = TRUE, sep = "\t", check.names = FALSE)
@@ -434,7 +434,7 @@ write.table(auc_table, file.path(out_root, "10_roc", "roc_auc_table.txt"), sep =
 
 manifest <- data.frame(
   figure = c(
-    "boxplot.preNorm", "boxplot.normalzie", "PCA.preNorm", "PCA.normalzie",
+    "boxplot.preNorm", "boxplot.normalize", "PCA.preNorm", "PCA.normalize",
     "Batch.heatmap", "volcano", "GO_Three_Ontologies", "Pathway_Enrichment_Score_dotplot",
     "cvfit", "lambda", "forest", "geneImportance", "SVM-RFE", "venn", "boxplot", paste0("ROC.", roc_genes)
   ),
