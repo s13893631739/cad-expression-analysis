@@ -1,0 +1,17 @@
+section	metric	value
+discovery	samples	337
+discovery	common_genes	19261
+discovery	differential_genes_unadjusted_p	286
+discovery	differential_genes_bh_fdr	1
+discovery	differential_threshold	abs(logFC) > 0.1 and unadjusted P < 0.05
+candidate_screen	lasso_genes	32
+candidate_screen	random_forest_genes	39
+candidate_screen	svm_rfe_genes	31
+candidate_screen	descriptive_overlap_genes	15
+predictive_model	outer_oof_roc_auc	0.550487787509791
+predictive_model	outer_oof_pr_auc	0.596917706480874
+predictive_model	final_nonzero_genes	6
+predictive_model	final_alpha	0.5
+external_evaluation	dataset	GSE113079
+external_evaluation	roc_auc	0.4415
+external_evaluation	pr_auc	0.6481
